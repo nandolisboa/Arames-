@@ -1,0 +1,81 @@
+name: Publicar logo transparente
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publicar-logo-transparente.yml']
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar logo revisada
+        uses: actions/checkout@v4
+        with:
+          ref: f16ced4798005a9f067aa0f590e8cbe3530c4e18
+          path: logo
+      - name: Baixar aplicativo
+        uses: actions/checkout@v4
+        with:
+          repository: nandolisboa/arames-001
+          ref: aa289ff44276f1183265512b6d9de21e46b4afe2
+          path: app
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Preservar layout vertical e instalar logo
+        working-directory: app
+        run: |
+          echo '170cbcaff6c095255c59b573dc55abbd3b91ad4b3cb9632b0a27361e04acb999  ../logo/favicon.png' | sha256sum -c
+          cp ../logo/favicon.png public/favicon.png
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('src/components/ProductionPanel.tsx')
+          s=p.read_text()
+          s=s.replace("      'kind',\n      'measure',\n      'gauge',\n      'pieces',", "      'kind',\n      'gauge',\n      'measure',\n      'pieces',")
+          for field in ('kind','gauge','pieces','units'):
+              s=s.replace(f'field{chr(36)}{{fieldErrors.{field}', f'field {field}-field{chr(36)}{{fieldErrors.{field}')
+          s=s.replace('applyKindValue(mapped);\n                    measureRef.current?.focus();','applyKindValue(mapped);\n                    gaugeRef.current?.focus();')
+          s=s.replace('applyKindValue(mapped);\n                      measureRef.current?.focus();','applyKindValue(mapped);\n                      gaugeRef.current?.focus();')
+          s=s.replace('piecesRef.current?.focus();','measureRef.current?.focus();')
+          a=s.index('            <div\n              className={`field measure-field')
+          b=s.index('            <div\n              className={`field gauge-field',a)
+          c=s.index('            <div\n              className={`field pieces-field',b)
+          s=s[:a]+s[b:c]+s[a:b]+s[c:]
+          p.write_text(s)
+          p=Path('src/index.css')
+          s=p.read_text().replace('grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);','grid-template-columns: minmax(0, 1fr);')
+          p.write_text(s)
+          p=Path('index.html')
+          s=p.read_text().replace('    <title>Produção de Estribos</title>', '    <title>Produção de Estribos</title>\n    <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />')
+          p.write_text(s)
+          PY
+          echo '2a1f0c22446c74cd983eefb0d7b377a4da909c1235a0f5414ad2b09a612342b1  src/components/ProductionPanel.tsx' | sha256sum -c
+          echo '47c27551c0cc629771876f268f5cdcd6267735659fe5d5d1004adcb4f3f2cf6f  src/index.css' | sha256sum -c
+      - name: Instalar dependencias
+        working-directory: app
+        run: bun install --frozen-lockfile
+      - name: Verificar codigo
+        working-directory: app
+        run: bun run lint
+      - name: Compilar
+        working-directory: app
+        run: bun run build --base /Arames-/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
