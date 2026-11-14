@@ -1,0 +1,43 @@
+name: Publicar Arames 001
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publicar-arames001.yml']
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar versao aprovada
+        uses: actions/checkout@v4
+        with:
+          repository: nandolisboa/arames-001
+          ref: aa289ff44276f1183265512b6d9de21e46b4afe2
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+      - name: Verificar codigo
+        run: bun run lint
+      - name: Compilar para o endereco antigo
+        run: bun run build --base /Arames-/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
