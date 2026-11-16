@@ -1909,3 +1909,28 @@ select:focus {
 .coil-form .coil-maker-field { min-width: 0; }
 @media (max-width: 760px) { .coil-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .coil-form { grid-template-columns: minmax(0, 1fr); } }
+
+.package-kind-toggle {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+:root.dark .package-kind-toggle { background: #e8eaed; color: #26313d; border-color: #d0d4d8; }
+
+.gauge-toggle {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+#formCard .field .gauge-toggle { height: 44px; min-height: 44px; }
+#formCard .btn.gauge-toggle.gauge-text-38 { color: var(--gauge-38); }
+#formCard .btn.gauge-toggle.gauge-text-42 { color: var(--gauge-42); }
+#formCard .btn.gauge-toggle.gauge-text-50 { color: var(--gauge-50); }
+#formCard .btn.gauge-toggle.gauge-text-60 { color: var(--gauge-60); }
+@media (max-width: 760px) { #formCard .field .gauge-toggle, #formCard .field .package-kind-toggle { height: 46px; min-height: 46px; font-size: 16px; } }
