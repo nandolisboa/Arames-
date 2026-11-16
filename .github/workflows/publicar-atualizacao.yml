@@ -1,0 +1,43 @@
+name: Publicar atualizacao do controle
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publicar-atualizacao.yml']
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar projeto atualizado
+        uses: actions/checkout@v4
+        with:
+          repository: nandolisboa/Atualizacao-controle-
+          ref: 1e40384ccc067d3fcc4de5ee3197860e82f9adc0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar dependencias
+        run: bun install --frozen-lockfile
+      - name: Verificar codigo
+        run: bun run lint
+      - name: Compilar para o endereco Arames
+        run: bun run build --base /Arames-/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
