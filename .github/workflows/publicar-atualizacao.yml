@@ -15,23 +15,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Baixar melhorias aprovadas
+        uses: actions/checkout@v4
+        with:
+          path: melhorias
       - name: Baixar projeto atualizado
         uses: actions/checkout@v4
         with:
           repository: nandolisboa/Atualizacao-controle-
           ref: 1e40384ccc067d3fcc4de5ee3197860e82f9adc0
+          path: app
+      - name: Aplicar melhorias de bobinas
+        run: |
+          cp melhorias/CoilsPanel.tsx app/src/components/CoilsPanel.tsx
+          cp melhorias/PdfPreviewDialog.tsx app/src/components/PdfPreviewDialog.tsx
+          cp melhorias/reports.ts app/src/lib/reports.ts
+          cp melhorias/index.css app/src/index.css
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
       - name: Instalar dependencias
+        working-directory: app
         run: bun install --frozen-lockfile
       - name: Verificar codigo
+        working-directory: app
         run: bun run lint
       - name: Compilar para o endereco Arames
+        working-directory: app
         run: bun run build --base /Arames-/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: app/dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
