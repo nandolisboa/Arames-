@@ -1903,3 +1903,9 @@ select:focus {
 @media (max-width: 480px) {
   .coil-form { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Os pesos mantêm larguras proporcionais quando Ambos está selecionado. */
+.coil-form { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); }
+.coil-form .coil-maker-field { min-width: 0; }
+@media (max-width: 760px) { .coil-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .coil-form { grid-template-columns: minmax(0, 1fr); } }

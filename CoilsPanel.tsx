@@ -9,6 +9,7 @@ import {
 import type { CoilRow } from '../types';
 import { ConfirmDialog } from './ConfirmDialog';
 import { PdfPreviewDialog } from './PdfPreviewDialog';
+import { formatCoilWeights } from '../lib/coilWeights';
 
 interface CoilsPanelProps {
   visible: boolean;
@@ -22,6 +23,8 @@ interface CoilsPanelProps {
     gauge: string;
     manufacturer: string;
     weight_kg: number;
+    weight_label_kg: number | null;
+    weight_scale_kg: number | null;
     weight_source: string;
     invoice_number: string;
     invoice_series: string | null;
@@ -44,7 +47,8 @@ export function CoilsPanel({
 }: CoilsPanelProps) {
   const [coilGauge, setCoilGauge] = useState('');
   const [coilManufacturer, setCoilManufacturer] = useState('');
-  const [coilWeight, setCoilWeight] = useState('');
+  const [labelWeight, setLabelWeight] = useState('');
+  const [scaleWeight, setScaleWeight] = useState('');
   const [coilSource, setCoilSource] = useState('ETIQUETA');
   const [coilInvoiceNumber, setCoilInvoiceNumber] = useState('');
   const [coilInvoiceSeries, setCoilInvoiceSeries] = useState('');
@@ -93,10 +97,7 @@ export function CoilsPanel({
       const key = [c.gauge, maker, c.weight_kg, c.weight_source].join('|');
       if (seen.has(key)) continue;
       seen.add(key);
-      const label = `${maker} — ${c.gauge} mm — ${Number(c.weight_kg).toLocaleString('pt-BR', {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3,
-      })} kg — ${c.weight_source === 'ETIQUETA' ? 'Etiqueta' : c.weight_source === 'AMBOS' ? 'Ambos' : 'Balança'}`;
+      const label = `${maker} — ${c.gauge} mm — ${formatCoilWeights(c)} — ${c.weight_source === 'ETIQUETA' ? 'Etiqueta' : c.weight_source === 'AMBOS' ? 'Ambos' : 'Balança'}`;
       if (
         `${maker} ${c.gauge} ${c.weight_kg}`
           .toLocaleLowerCase('pt-BR')
@@ -121,8 +122,14 @@ export function CoilsPanel({
   const handleSave = async () => {
     if (!isAdmin) return;
     const manufacturer = coilManufacturer.trim();
-    const weightText = coilWeight.trim().replace(',', '.');
-    const weight = Number(weightText);
+    const parseWeight = (text: string) => {
+      const normalized = text.trim().replace(',', '.');
+      const n = Number(normalized);
+      return /^[0-9]+(?:\.[0-9]{1,3})?$/.test(normalized) && n > 0 && n <= 100000 ? n : null;
+    };
+    const label = parseWeight(labelWeight);
+    const scale = parseWeight(scaleWeight);
+    const weight = coilSource === 'BALANCA' ? scale : label;
     const invoiceNumber = coilInvoiceNumber.trim();
     const invoiceSeries = coilInvoiceSeries.trim();
 
@@ -130,10 +137,8 @@ export function CoilsPanel({
       !GAUGES.includes(coilGauge as (typeof GAUGES)[number]) ||
       !manufacturer ||
       manufacturer.length > 80 ||
-      !/^[0-9]+(?:\.[0-9]{1,3})?$/.test(weightText) ||
-      !Number.isFinite(weight) ||
-      weight <= 0 ||
-      weight > 100000 ||
+      weight === null ||
+      (coilSource === 'AMBOS' && (label === null || scale === null)) ||
       !['ETIQUETA', 'BALANCA', 'AMBOS'].includes(coilSource) ||
       !invoiceNumber ||
       invoiceNumber.length > 40 ||
@@ -149,6 +154,8 @@ export function CoilsPanel({
         gauge: coilGauge,
         manufacturer,
         weight_kg: weight,
+        weight_label_kg: coilSource === 'BALANCA' ? null : label,
+        weight_scale_kg: coilSource === 'ETIQUETA' ? null : scale,
         weight_source: coilSource,
         invoice_number: invoiceNumber,
         invoice_series: invoiceSeries || null,
@@ -156,7 +163,8 @@ export function CoilsPanel({
       if (ok) {
         setCoilGauge('');
         setCoilManufacturer('');
-        setCoilWeight('');
+        setLabelWeight('');
+        setScaleWeight('');
         setCoilSource('ETIQUETA');
         setCoilInvoiceNumber('');
         setCoilInvoiceSeries('');
@@ -327,7 +335,8 @@ export function CoilsPanel({
                     onClick={() => {
                       setCoilGauge(String(coil.gauge));
                       setCoilManufacturer(String(coil.manufacturer));
-                      setCoilWeight(String(coil.weight_kg).replace('.', ','));
+                      setLabelWeight(String(coil.weight_label_kg ?? (coil.weight_source === 'ETIQUETA' ? coil.weight_kg : '')).replace('.', ','));
+                      setScaleWeight(String(coil.weight_scale_kg ?? (coil.weight_source === 'BALANCA' ? coil.weight_kg : '')).replace('.', ','));
                       setCoilSource(String(coil.weight_source));
                       setShowSuggestions(false);
                     }}
@@ -338,18 +347,20 @@ export function CoilsPanel({
                 ))}
               </div>
             </div>
-            <div className="field">
-              <label htmlFor="coilWeight">Peso (kg)</label>
-              <input
-                id="coilWeight"
-                inputMode="decimal"
-                maxLength={12}
-                placeholder="0,000"
-                type="text"
-                value={coilWeight}
-                onChange={(e) => setCoilWeight(e.target.value)}
-              />
-            </div>
+            {(coilSource === 'ETIQUETA' || coilSource === 'AMBOS') && (
+              <div className="field">
+                <label htmlFor="coilWeightLabel">Peso etiqueta (kg)</label>
+                <input id="coilWeightLabel" inputMode="decimal" maxLength={12} placeholder="0,000" type="text"
+                  value={labelWeight} onChange={(e) => setLabelWeight(e.target.value)} />
+              </div>
+            )}
+            {(coilSource === 'BALANCA' || coilSource === 'AMBOS') && (
+              <div className="field">
+                <label htmlFor="coilWeightScale">Peso balança (kg)</label>
+                <input id="coilWeightScale" inputMode="decimal" maxLength={12} placeholder="0,000" type="text"
+                  value={scaleWeight} onChange={(e) => setScaleWeight(e.target.value)} />
+              </div>
+            )}
             <div className="field">
               <label htmlFor="coilSource">Peso informado por</label>
               <button
@@ -481,10 +492,7 @@ export function CoilsPanel({
                       <td>{c.invoice_number || '—'}</td>
                       <td>{c.invoice_series || '—'}</td>
                       <td className="num">
-                        {Number(c.weight_kg).toLocaleString('pt-BR', {
-                          minimumFractionDigits: 3,
-                          maximumFractionDigits: 3,
-                        })}
+                        {formatCoilWeights(c)}
                       </td>
                       <td>
                         {c.weight_source === 'ETIQUETA' ? 'Etiqueta' : c.weight_source === 'AMBOS' ? 'Ambos' : 'Balança'}
@@ -523,11 +531,7 @@ export function CoilsPanel({
                       </span>
                     </div>
                     <div className="mobile-record-total">
-                      {Number(c.weight_kg).toLocaleString('pt-BR', {
-                        minimumFractionDigits: 3,
-                        maximumFractionDigits: 3,
-                      })}{' '}
-                      kg
+                      {formatCoilWeights(c)}
                     </div>
                   </div>
                   <div className="mobile-record-bottom">
