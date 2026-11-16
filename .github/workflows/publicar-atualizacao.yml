@@ -34,6 +34,7 @@ jobs:
           cp melhorias/App.tsx app/src/App.tsx
           cp melhorias/types.ts app/src/types.ts
           cp melhorias/coilWeights.ts app/src/lib/coilWeights.ts
+          cp melhorias/ProductionPanel.tsx app/src/components/ProductionPanel.tsx
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
