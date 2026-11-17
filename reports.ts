@@ -154,10 +154,10 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
   let y = 0;
 
   const pageTop = () => {
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('courier', 'bold');
     doc.setFontSize(15);
     doc.text(MESSAGES.reportTitle, margin, 14);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('courier', 'normal');
     doc.setFontSize(8);
     doc.text(`Emitido em ${fmtDate(today())}`, margin, 19);
     y = 25;
@@ -168,7 +168,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     const h = 8;
     doc.setDrawColor(195, 202, 208);
     doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('courier', 'bold');
     doc.setFontSize(8);
     for (const c of cols) {
       doc.text(c.label, x + 1.5, y + 5.2);
@@ -193,7 +193,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
       const list = rows.filter((r) => r.operator === op);
       if (!list.length) continue;
       if (y + 19 > pageH - 12) newPage();
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('courier', 'bold');
       doc.setFontSize(10);
       doc.text(op, margin, y + 6);
       y += 9;
@@ -219,7 +219,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
 
         if (y + h > pageH - 15) {
           newPage();
-          doc.setFont('helvetica', 'bold');
+          doc.setFont('courier', 'bold');
           doc.setFontSize(10);
           doc.text(`${op} (continuacao)`, margin, y + 6);
           y += 9;
@@ -228,7 +228,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
 
         let x = margin;
         for (let i = 0; i < cols.length; i++) {
-          doc.setFont('helvetica', 'normal');
+          doc.setFont('courier', 'normal');
           doc.setFontSize(8);
           doc.setTextColor(0, 0, 0);
           doc.text(cells[i], x + 1.5, y + 4.8);
@@ -241,7 +241,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
       }
 
       if (y + 9 > pageH - 12) newPage();
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('courier', 'bold');
       doc.setFontSize(8);
       doc.text(
         `Subtotal ${op}: ${subtotal.toLocaleString('pt-BR')} pecas`,
@@ -253,7 +253,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     }
 
     if (y + 10 > pageH - 12) newPage();
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('courier', 'bold');
     doc.setFontSize(9);
     doc.text(
       `TOTAL GERAL: ${rows
@@ -324,10 +324,10 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
   let y = 0;
 
   const pageTop = () => {
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('courier', 'bold');
     doc.setFontSize(16);
     doc.text(MESSAGES.coilsTitle, margin, 15);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('courier', 'normal');
     doc.setFontSize(8);
     doc.text(`Emitido em ${fmtDate(today())}`, margin, 21);
     y = 28;
@@ -338,7 +338,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     const h = 9;
     doc.setDrawColor(195, 202, 208);
     doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('courier', 'bold');
     doc.setFontSize(9);
     for (const c of cols) {
       doc.text(c.label, x + 2, y + 6);
@@ -378,7 +378,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     if (y + h > pageH - 13) nextPage();
     let x = margin;
     for (let i = 0; i < cols.length; i++) {
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('courier', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
       doc.text(cells[i], x + 2, y + 5.8);

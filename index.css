@@ -95,7 +95,7 @@
 body {
   margin: 0;
   background: var(--bg);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Courier New', Courier, monospace;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   transition: background-color 150ms ease, color 150ms ease;
@@ -103,7 +103,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -469,7 +470,7 @@ select:focus {
 }
 
 .total-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Courier New', Courier, monospace;
   font-variant-numeric: tabular-nums;
   font-size: 15px;
   font-weight: 700;
@@ -679,7 +680,7 @@ select:focus {
 .saved-table .num,
 .coils-table .num {
   text-align: right;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Courier New', Courier, monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1182,7 +1183,7 @@ select:focus {
 }
 
 .goal-title span:last-child {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Courier New', Courier, monospace;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1287,7 +1288,7 @@ select:focus {
   color: #111;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .report-sheet-header {
@@ -1641,7 +1642,7 @@ select:focus {
   }
 
   .mobile-record-total {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Courier New', Courier, monospace;
     font-variant-numeric: tabular-nums;
     font-size: 15px;
     font-weight: 700;
@@ -1791,7 +1792,7 @@ select:focus {
 
   #printArea {
     display: block !important;
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
   }
 
   #printArea .report-sheet {
