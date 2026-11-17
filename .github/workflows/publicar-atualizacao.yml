@@ -18,6 +18,82 @@ jobs:
       - name: Baixar melhorias aprovadas
         uses: actions/checkout@v4
         with:
+name: Publicar atualizacao do controle
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publicar-atualizacao.yml']
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar codigo oficial
+        uses: actions/checkout@v4
+        with:
+          path: melhorias
+      - name: Restaurar base e aplicar arquivos oficiais
+        run: |
+          mkdir app
+          unzip -q melhorias/projeto-base-arames.zip -d app
+          cp melhorias/CoilsPanel.tsx app/src/components/CoilsPanel.tsx
+          cp melhorias/PdfPreviewDialog.tsx app/src/components/PdfPreviewDialog.tsx
+          cp melhorias/App.tsx app/src/App.tsx
+          cp melhorias/types.ts app/src/types.ts
+          cp melhorias/coilWeights.ts app/src/lib/coilWeights.ts
+          cp melhorias/ProductionPanel.tsx app/src/components/ProductionPanel.tsx
+          curl -fsSL https://raw.githubusercontent.com/nandolisboa/Arames-/960839310d821ab5da8ee7a8ddf2a7e0ce1abe00/index.css -o app/src/index.css
+          curl -fsSL https://raw.githubusercontent.com/nandolisboa/Arames-/960839310d821ab5da8ee7a8ddf2a7e0ce1abe00/reports.ts -o app/src/lib/reports.ts
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar dependencias
+        working-directory: app
+        run: bun install --frozen-lockfile
+      - name: Verificar base contra a versao publicada
+        working-directory: app
+        run: |
+          bun run lint
+          bun run build --base /Arames-/
+          python3 - <<'PY'
+          import hashlib, pathlib, re, urllib.request
+          root='https://nandolisboa.github.io'
+          html=urllib.request.urlopen(root+'/Arames-/').read().decode()
+          paths=re.findall(r'(?:src|href)="(/Arames-/assets/index-[^"]+\.(?:js|css))"',html)
+          assert len(paths)==2, 'Nao foi possivel identificar os arquivos publicados'
+          for path in paths:
+              live=urllib.request.urlopen(root+path).read()
+              local=pathlib.Path('dist/assets',path.rsplit('/',1)[1])
+              assert local.exists(), f'A base compilada difere da versao publicada: {local}'
+              assert hashlib.sha256(live).digest()==hashlib.sha256(local.read_bytes()).digest(), f'Conteudo diferente: {path}'
+          print('A base compilada corresponde aos arquivos publicados.')
+          PY
+      - name: Aplicar fonte e compilar versao oficial
+        working-directory: app
+        run: |
+          cp ../melhorias/index.css src/index.css
+          cp ../melhorias/reports.ts src/lib/reports.ts
+          bun run lint
+          bun run build --base /Arames-/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
           path: melhorias
       - name: Baixar projeto atualizado
         uses: actions/checkout@v4
