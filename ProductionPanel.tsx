@@ -70,7 +70,7 @@ export function ProductionPanel({
 }: ProductionPanelProps) {
   const [date, setDate] = useState(today);
   const [operator, setOperator] = useState<OperatorName>('Fernando');
-  const [kind, setKind] = useState<string>('');
+  const [kind, setKind] = useState<string>('PACOTE');
   const [measure, setMeasure] = useState('');
   const [gauge, setGauge] = useState<string>('3,8');
   const [pieces, setPieces] = useState('');
@@ -393,7 +393,7 @@ export function ProductionPanel({
     setKind(() =>
       keepChoices && KINDS.includes(keepChoices.kind as (typeof KINDS)[number])
         ? keepChoices.kind
-        : ''
+        : 'PACOTE'
     );
     setPieces('');
     setUnits('');
@@ -665,7 +665,7 @@ export function ProductionPanel({
               <button
                 ref={kindRef}
                 aria-invalid={fieldErrors.kind ? 'true' : undefined}
-                aria-label={`Tipo de pacote: ${kind || 'não selecionado'}. Toque para mudar.`}
+                aria-label={`Pacote selecionado: ${kind}. Toque para mudar.`}
                 aria-required="true"
                 className="btn secondary package-kind-toggle"
                 id="kind"
@@ -676,7 +676,7 @@ export function ProductionPanel({
                   applyKindValue(nextKind);
                 }}
               >
-                {kind || 'Tipo de pacote'}
+                {kind}
               </button>
             </div>
 
