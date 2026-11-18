@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { GAUGES, gaugeTextClass, gaugeValueForDigit } from '../constants';
+import { GAUGES, gaugeTextClass } from '../constants';
 import {
   createCoilsPdfPreview,
   downloadCoilsPDF,
@@ -61,7 +61,7 @@ export function CoilsPanel({
   const [pendingDeleteCoil, setPendingDeleteCoil] = useState<CoilRow | null>(null);
   const [pdfPreview, setPdfPreview] = useState<PdfPreviewData | null>(null);
 
-  const coilGaugeRef = useRef<HTMLInputElement>(null);
+  const coilGaugeRef = useRef<HTMLButtonElement>(null);
   const makerInputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -261,44 +261,20 @@ export function CoilsPanel({
           <div className="coil-form">
             <div className="field">
               <label htmlFor="coilGauge">Bobina (mm)</label>
-              <input
+              <button
                 ref={coilGaugeRef}
-                aria-label="Bobina (mm)"
+                aria-label={`Bobina (mm): ${coilGauge || 'não selecionada'}. Toque para mudar.`}
                 aria-required="true"
-                autoComplete="off"
-                className={gaugeTextClass(coilGauge)}
+                className={`btn secondary gauge-toggle ${gaugeTextClass(coilGauge)}`}
                 id="coilGauge"
-                inputMode="numeric"
-                maxLength={3}
-                placeholder="3, 4, 5 ou 6"
-                required
-                type="text"
-                value={coilGauge}
-                onChange={(e) => {
-                  const raw = e.target.value.trim();
-                  if (raw && /^[3456]/.test(raw) && !GAUGES.includes(raw as (typeof GAUGES)[number])) {
-                    setCoilGauge(gaugeValueForDigit(raw.charAt(0)));
-                    setTimeout(() => makerInputRef.current?.focus(), 0);
-                  } else {
-                    setCoilGauge(raw);
-                  }
+                type="button"
+                onClick={() => {
+                  const currentIndex = GAUGES.indexOf(coilGauge as (typeof GAUGES)[number]);
+                  setCoilGauge(GAUGES[(currentIndex + 1) % GAUGES.length]);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Backspace' || e.key === 'Delete') {
-                    e.preventDefault();
-                    setCoilGauge('');
-                    return;
-                  }
-                  if (!e.ctrlKey && !e.metaKey && !e.altKey && /^[3456]$/.test(e.key)) {
-                    e.preventDefault();
-                    setCoilGauge(gaugeValueForDigit(e.key));
-                    setTimeout(() => makerInputRef.current?.focus(), 0);
-                  } else if (e.key === 'Enter' && GAUGES.includes(coilGauge as (typeof GAUGES)[number])) {
-                    e.preventDefault();
-                    makerInputRef.current?.focus();
-                  }
-                }}
-              />
+              >
+                {coilGauge || 'Selecione'}
+              </button>
             </div>
             <div className="field coil-maker-field">
               <label htmlFor="coilManufacturer">Fabricante</label>
