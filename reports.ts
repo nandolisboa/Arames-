@@ -139,28 +139,28 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     unit: 'mm',
     format: 'a4',
   });
-  const margin = 14;
+  const margin = 4;
   const pageW = 297;
   const pageH = 210;
   const cols = [
-    { label: 'Data', w: 25 },
-    { label: 'Bitola', w: 25 },
-    { label: 'Medida do estribo', w: 58 },
+    { label: 'Data', w: 27 },
+    { label: 'Bitola', w: 26 },
+    { label: 'Medida do estribo', w: 72 },
     { label: 'Pacote', w: 35 },
-    { label: 'Qtd de pecas', w: 39 },
-    { label: 'Qtd de pacotes', w: 40 },
-    { label: 'Total', w: 33 },
+    { label: 'Qtd de pecas', w: 40 },
+    { label: 'Qtd de pacotes', w: 45 },
+    { label: 'Total', w: 44 },
   ];
   let y = 0;
 
   const pageTop = () => {
     doc.setFont('courier', 'bold');
     doc.setFontSize(15);
-    doc.text(MESSAGES.reportTitle, margin, 14);
+    doc.text(MESSAGES.reportTitle, margin, 10);
     doc.setFont('courier', 'normal');
     doc.setFontSize(8);
-    doc.text(`Emitido em ${fmtDate(today())}`, margin, 19);
-    y = 25;
+    doc.text(`Emitido em ${fmtDate(today())}`, margin, 15);
+    y = 19;
   };
 
   const tableHead = () => {
@@ -189,10 +189,11 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     doc.setFontSize(10);
     doc.text(MESSAGES.reportNoRows, margin, y + 7);
   } else {
-    for (const op of OPERATORS) {
+    const activeOperators = OPERATORS.filter((op) => rows.some((r) => r.operator === op));
+    for (const op of activeOperators) {
       const list = rows.filter((r) => r.operator === op);
       if (!list.length) continue;
-      if (y + 19 > pageH - 12) newPage();
+      if (y + 19 > pageH - 4) newPage();
       doc.setFont('courier', 'bold');
       doc.setFontSize(10);
       doc.text(op, margin, y + 6);
@@ -200,7 +201,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
       tableHead();
       let subtotal = 0;
 
-      for (const r of list) {
+      for (const [rowIndex, r] of list.entries()) {
         const vals = [
           fmtDate(rowDate(r.production_date)),
           `${String(r.gauge)} mm`,
@@ -217,7 +218,10 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
         for (const c of cells) lines = Math.max(lines, c.length);
         const h = Math.max(7, lines * 4 + 2);
 
-        if (y + h > pageH - 15) {
+        const footerSpace = rowIndex === list.length - 1
+          ? 9 + (op === activeOperators[activeOperators.length - 1] ? 10 : 0)
+          : 0;
+        if (y + h + footerSpace > pageH - 4) {
           newPage();
           doc.setFont('courier', 'bold');
           doc.setFontSize(10);
@@ -240,7 +244,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
         subtotal += Number(r.total_pieces);
       }
 
-      if (y + 9 > pageH - 12) newPage();
+      if (y + 9 > pageH - 4) newPage();
       doc.setFont('courier', 'bold');
       doc.setFontSize(8);
       doc.text(
@@ -252,7 +256,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
       y += 9;
     }
 
-    if (y + 10 > pageH - 12) newPage();
+    if (y + 10 > pageH - 4) newPage();
     doc.setFont('courier', 'bold');
     doc.setFontSize(9);
     doc.text(
@@ -311,13 +315,13 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     unit: 'mm',
     format: 'a4',
   });
-  const margin = 14;
+  const margin = 5;
   const pageH = 210;
   const cols = [
-    { label: 'Bobina (mm)', w: 27 },
-    { label: 'Fabricante', w: 75 },
-    { label: 'Nº da NF', w: 60 },
-    { label: 'Série', w: 18 },
+    { label: 'Bobina (mm)', w: 32 },
+    { label: 'Fabricante', w: 78 },
+    { label: 'Nº da NF', w: 64 },
+    { label: 'Série', w: 24 },
     { label: 'Peso (kg)', w: 43 },
     { label: 'Origem do peso', w: 46 },
   ];
@@ -326,11 +330,11 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
   const pageTop = () => {
     doc.setFont('courier', 'bold');
     doc.setFontSize(16);
-    doc.text(MESSAGES.coilsTitle, margin, 15);
+    doc.text(MESSAGES.coilsTitle, margin, 10);
     doc.setFont('courier', 'normal');
     doc.setFontSize(8);
-    doc.text(`Emitido em ${fmtDate(today())}`, margin, 21);
-    y = 28;
+    doc.text(`Emitido em ${fmtDate(today())}`, margin, 15);
+    y = 20;
   };
 
   const header = () => {
@@ -344,7 +348,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
       doc.text(c.label, x + 2, y + 6);
       x += c.w;
     }
-    doc.line(margin, y + h, 283, y + h);
+    doc.line(margin, y + h, 292, y + h);
     y += h;
   };
 
@@ -375,7 +379,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     let lines = 1;
     for (const c of cells) lines = Math.max(lines, c.length);
     const h = Math.max(9, lines * 4.5 + 3);
-    if (y + h > pageH - 13) nextPage();
+    if (y + h > pageH - 5) nextPage();
     let x = margin;
     for (let i = 0; i < cols.length; i++) {
       doc.setFont('courier', 'normal');
@@ -385,7 +389,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
       x += cols[i].w;
     }
     doc.setDrawColor(230, 233, 236);
-    doc.line(14, y + h, 283, y + h);
+    doc.line(5, y + h, 292, y + h);
     y += h;
   }
 
