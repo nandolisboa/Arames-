@@ -1819,6 +1819,11 @@ select:focus {
     table-layout: fixed;
   }
 
+  #printArea .report-sheet--production .pgroup + .pgroup {
+    break-before: page;
+    page-break-before: always;
+  }
+
   #printArea .report-sheet--production .pgroup th,
   #printArea .report-sheet--production .pgroup td {
     font-family: 'Courier New', Courier, monospace;

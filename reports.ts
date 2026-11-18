@@ -200,9 +200,9 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     doc.setFontSize(9);
     doc.text(MESSAGES.reportNoRows, margin, y + 6);
   } else {
-    for (const op of activeOperators) {
+    for (const [operatorIndex, op] of activeOperators.entries()) {
       const list = rows.filter((r) => r.operator === op);
-      if (y + 15 + 7.55 > pageH - margin) nextPage();
+      if (operatorIndex > 0) nextPage();
       operatorHeader(op);
       let subtotal = 0;
       for (const [index, row] of list.entries()) {
