@@ -1767,6 +1767,11 @@ select:focus {
   margin: 8mm;
 }
 
+@page relatorio-producao {
+  size: A4 portrait;
+  margin: 5mm;
+}
+
 #printArea {
   display: none;
 }
@@ -1804,6 +1809,30 @@ select:focus {
 
   #printArea .report-sheet-logo {
     width: 50mm;
+  }
+
+  #printArea .report-sheet--production {
+    page: relatorio-producao;
+  }
+
+  #printArea .report-sheet--production .pgroup table {
+    table-layout: fixed;
+  }
+
+  #printArea .report-sheet--production .pgroup th,
+  #printArea .report-sheet--production .pgroup td {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 7.4pt;
+    line-height: 1.1;
+    padding: 2mm 1mm;
+    overflow-wrap: anywhere;
+    color: #000;
+    background: #fff;
+  }
+
+  #printArea .report-sheet--production .pgroup h2 {
+    color: #000;
+    background: #fff;
   }
 
   .ptitle {

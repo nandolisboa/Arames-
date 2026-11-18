@@ -23,7 +23,7 @@ function addCompanyLogo(doc: jsPDF): void {
     doc.addImage(
       ARAMES_LOGO_DATA_URL,
       'PNG',
-      233,
+      doc.internal.pageSize.getWidth() - 55,
       4,
       50,
       7.14,
@@ -134,137 +134,129 @@ export function exportProductionExcel(
 }
 
 function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
-  const doc = new jsPDF({
-    orientation: 'landscape',
-    unit: 'mm',
-    format: 'a4',
-  });
-  const margin = 14;
-  const pageW = 297;
-  const pageH = 210;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const margin = 5;
+  const pageW = 210;
+  const pageH = 297;
   const cols = [
-    { label: 'Data', w: 25 },
-    { label: 'Bitola', w: 25 },
-    { label: 'Medida do estribo', w: 58 },
-    { label: 'Pacote', w: 35 },
-    { label: 'Qtd de pecas', w: 39 },
-    { label: 'Qtd de pacotes', w: 40 },
-    { label: 'Total', w: 33 },
+    { label: 'Data', w: 26 },
+    { label: 'Bitola', w: 18 },
+    { label: 'Medida do estribo', w: 43 },
+    { label: 'Pacote', w: 23 },
+    { label: 'Qtd de peças', w: 29 },
+    { label: 'Qtd de pacotes', w: 39 },
+    { label: 'Total', w: 22 },
   ];
   let y = 0;
 
   const pageTop = () => {
+    doc.setTextColor(0, 0, 0);
     doc.setFont('courier', 'bold');
-    doc.setFontSize(15);
-    doc.text(MESSAGES.reportTitle, margin, 14);
+    doc.setFontSize(12);
+    doc.text(MESSAGES.reportTitle, margin, 10);
     doc.setFont('courier', 'normal');
-    doc.setFontSize(8);
-    doc.text(`Emitido em ${fmtDate(today())}`, margin, 19);
-    y = 25;
+    doc.setFontSize(7);
+    doc.text(`Emitido em ${fmtDate(today())}`, margin, 15);
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.15);
+    doc.line(margin, 17, pageW - margin, 17);
+    y = 19;
   };
 
   const tableHead = () => {
+    const h = 10;
     let x = margin;
-    const h = 8;
-    doc.setDrawColor(195, 202, 208);
-    doc.setTextColor(0, 0, 0);
     doc.setFont('courier', 'bold');
-    doc.setFontSize(8);
-    for (const c of cols) {
-      doc.text(c.label, x + 1.5, y + 5.2);
-      x += c.w;
+    doc.setFontSize(6.8);
+    doc.setTextColor(0, 0, 0);
+    doc.setDrawColor(120, 120, 120);
+    doc.setLineWidth(0.12);
+    for (const col of cols) {
+      doc.rect(x, y, col.w, h);
+      const label = doc.splitTextToSize(col.label, col.w - 2);
+      doc.text(label, x + 1, y + 3.5, { lineHeightFactor: 1.1 });
+      x += col.w;
     }
-    doc.line(margin, y + h, pageW - margin, y + h);
     y += h;
   };
 
-  const newPage = () => {
-    doc.addPage('a4', 'landscape');
+  const operatorHeader = (operator: string, continuation = false) => {
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.text(`${operator}${continuation ? ' (continuação)' : ''}`, margin, y + 3);
+    y += 5;
+    tableHead();
+  };
+
+  const nextPage = (operator?: string) => {
+    doc.addPage('a4', 'portrait');
     pageTop();
+    if (operator) operatorHeader(operator, true);
   };
 
   pageTop();
-
+  const activeOperators = OPERATORS.filter((op) => rows.some((r) => r.operator === op));
   if (!rows.length) {
-    doc.setFontSize(10);
-    doc.text(MESSAGES.reportNoRows, margin, y + 7);
-  } else {
-    for (const op of OPERATORS) {
-      const list = rows.filter((r) => r.operator === op);
-      if (!list.length) continue;
-      if (y + 19 > pageH - 12) newPage();
-      doc.setFont('courier', 'bold');
-      doc.setFontSize(10);
-      doc.text(op, margin, y + 6);
-      y += 9;
-      tableHead();
-      let subtotal = 0;
-
-      for (const r of list) {
-        const vals = [
-          fmtDate(rowDate(r.production_date)),
-          `${String(r.gauge)} mm`,
-          String(r.measure || ''),
-          String(r.package_type),
-          Number(r.pieces_per_unit).toLocaleString('pt-BR'),
-          Number(r.units).toLocaleString('pt-BR'),
-          Number(r.total_pieces).toLocaleString('pt-BR'),
-        ];
-        const cells = vals.map((v, i) =>
-          doc.splitTextToSize(String(v), cols[i].w - 3)
-        );
-        let lines = 1;
-        for (const c of cells) lines = Math.max(lines, c.length);
-        const h = Math.max(7, lines * 4 + 2);
-
-        if (y + h > pageH - 15) {
-          newPage();
-          doc.setFont('courier', 'bold');
-          doc.setFontSize(10);
-          doc.text(`${op} (continuacao)`, margin, y + 6);
-          y += 9;
-          tableHead();
-        }
-
-        let x = margin;
-        for (let i = 0; i < cols.length; i++) {
-          doc.setFont('courier', 'normal');
-          doc.setFontSize(8);
-          doc.setTextColor(0, 0, 0);
-          doc.text(cells[i], x + 1.5, y + 4.8);
-          x += cols[i].w;
-        }
-        doc.setDrawColor(230, 233, 236);
-        doc.line(margin, y + h, pageW - margin, y + h);
-        y += h;
-        subtotal += Number(r.total_pieces);
-      }
-
-      if (y + 9 > pageH - 12) newPage();
-      doc.setFont('courier', 'bold');
-      doc.setFontSize(8);
-      doc.text(
-        `Subtotal ${op}: ${subtotal.toLocaleString('pt-BR')} pecas`,
-        pageW - margin,
-        y + 5,
-        { align: 'right' }
-      );
-      y += 9;
-    }
-
-    if (y + 10 > pageH - 12) newPage();
-    doc.setFont('courier', 'bold');
     doc.setFontSize(9);
-    doc.text(
-      `TOTAL GERAL: ${rows
-        .reduce((a, r) => a + Number(r.total_pieces), 0)
-        .toLocaleString('pt-BR')} pecas`,
-      pageW - margin,
-      y + 5,
-      { align: 'right' }
-    );
+    doc.text(MESSAGES.reportNoRows, margin, y + 6);
+  } else {
+    for (const op of activeOperators) {
+      const list = rows.filter((r) => r.operator === op);
+      if (y + 15 + 7.55 > pageH - margin) nextPage();
+      operatorHeader(op);
+      let subtotal = 0;
+      for (const [index, row] of list.entries()) {
+        const values = [
+          fmtDate(rowDate(row.production_date)),
+          `${String(row.gauge)} mm`,
+          String(row.measure || ''),
+          String(row.package_type),
+          Number(row.pieces_per_unit).toLocaleString('pt-BR'),
+          Number(row.units).toLocaleString('pt-BR'),
+          Number(row.total_pieces).toLocaleString('pt-BR'),
+        ];
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(7.4);
+        const cells = values.map((v, i) => doc.splitTextToSize(v, cols[i].w - 2));
+        const lineCount = Math.max(...cells.map((cell: string[]) => cell.length));
+        const rowHeight = Math.max(7.55, lineCount * 3.1 + 2);
+        const lastOfGroup = index === list.length - 1;
+        const lastGroup = op === activeOperators[activeOperators.length - 1];
+        const footer = lastOfGroup ? 8 + (lastGroup ? 8 : 0) : 0;
+        if (y + rowHeight + footer > pageH - margin) nextPage(op);
+        let x = margin;
+        doc.setDrawColor(160, 160, 160);
+        doc.setLineWidth(0.1);
+        for (let i = 0; i < cols.length; i++) {
+          const col = cols[i];
+          doc.rect(x, y, col.w, rowHeight);
+          doc.setFont('courier', 'normal');
+          doc.setFontSize(7.4);
+          doc.setTextColor(0, 0, 0);
+          if (i >= 4) {
+            doc.text(cells[i], x + col.w - 1, y + 4.8, { align: 'right', lineHeightFactor: 1.1 });
+          } else {
+            doc.text(cells[i], x + 1, y + 4.8, { lineHeightFactor: 1.1 });
+          }
+          x += col.w;
+        }
+        y += rowHeight;
+        subtotal += Number(row.total_pieces);
+      }
+      if (y + 8 > pageH - margin) nextPage();
+      doc.setFont('courier', 'bold');
+      doc.setFontSize(7.4);
+      doc.text(`Subtotal ${op}: ${subtotal.toLocaleString('pt-BR')} peças`, pageW - margin, y + 4.5, { align: 'right' });
+      y += 8;
+    }
+    if (y + 8 > pageH - margin) nextPage();
+    doc.setDrawColor(0, 0, 0);
+    doc.line(margin, y, pageW - margin, y);
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    const grandTotal = rows.reduce((sum, row) => sum + Number(row.total_pieces), 0);
+    doc.text(`TOTAL GERAL: ${grandTotal.toLocaleString('pt-BR')} peças`, pageW - margin, y + 5, { align: 'right' });
   }
-
   addCompanyLogo(doc);
   return doc;
 }

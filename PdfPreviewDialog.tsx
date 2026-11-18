@@ -15,7 +15,7 @@ function ReportDocument({ preview }: ReportDocumentProps) {
     const grandTotal = rows.reduce((a, r) => a + Number(r.total_pieces), 0);
 
     return (
-      <div className="report-sheet">
+      <div className="report-sheet report-sheet--production">
         <div className="report-sheet-header">
           <div>
             <h1 className="ptitle">{preview.title}</h1>
@@ -44,6 +44,11 @@ function ReportDocument({ preview }: ReportDocumentProps) {
                 <div key={op} className="pgroup">
                   <h2>{op}</h2>
                   <table>
+                    <colgroup>
+                      {[13, 9, 21.5, 11.5, 14.5, 19.5, 11].map((width, i) => (
+                        <col key={i} style={{ width: `${width}%` }} />
+                      ))}
+                    </colgroup>
                     <thead>
                       <tr>
                         <th>Data</th>
