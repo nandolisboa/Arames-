@@ -151,10 +151,10 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
 
   const pageTop = () => {
     doc.setTextColor(0, 0, 0);
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.text(MESSAGES.reportTitle, margin, 10);
-    doc.setFont('courier', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.text(`Emitido em ${fmtDate(today())}`, margin, 15);
     doc.setDrawColor(100, 100, 100);
@@ -166,7 +166,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
   const tableHead = () => {
     const h = 10;
     let x = margin;
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(6.8);
     doc.setTextColor(0, 0, 0);
     doc.setDrawColor(120, 120, 120);
@@ -181,7 +181,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
   };
 
   const operatorHeader = (operator: string, continuation = false) => {
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     doc.text(`${operator}${continuation ? ' (continuação)' : ''}`, margin, y + 3);
     y += 5;
@@ -215,7 +215,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
           Number(row.units).toLocaleString('pt-BR'),
           Number(row.total_pieces).toLocaleString('pt-BR'),
         ];
-        doc.setFont('courier', 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.4);
         const cells = values.map((v, i) => doc.splitTextToSize(v, cols[i].w - 2));
         const lineCount = Math.max(...cells.map((cell: string[]) => cell.length));
@@ -230,7 +230,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
         for (let i = 0; i < cols.length; i++) {
           const col = cols[i];
           doc.rect(x, y, col.w, rowHeight);
-          doc.setFont('courier', 'normal');
+          doc.setFont('helvetica', 'normal');
           doc.setFontSize(7.4);
           doc.setTextColor(0, 0, 0);
           if (i >= 4) {
@@ -244,7 +244,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
         subtotal += Number(row.total_pieces);
       }
       if (y + 8 > pageH - margin) nextPage();
-      doc.setFont('courier', 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.4);
       doc.text(`Subtotal ${op}: ${subtotal.toLocaleString('pt-BR')} peças`, pageW - margin, y + 4.5, { align: 'right' });
       y += 8;
@@ -252,7 +252,7 @@ function buildProductionPDFDoc(rows: ProductionRow[]): jsPDF {
     if (y + 8 > pageH - margin) nextPage();
     doc.setDrawColor(0, 0, 0);
     doc.line(margin, y, pageW - margin, y);
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     const grandTotal = rows.reduce((sum, row) => sum + Number(row.total_pieces), 0);
     doc.text(`TOTAL GERAL: ${grandTotal.toLocaleString('pt-BR')} peças`, pageW - margin, y + 5, { align: 'right' });
@@ -316,10 +316,10 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
   let y = 0;
 
   const pageTop = () => {
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.text(MESSAGES.coilsTitle, margin, 15);
-    doc.setFont('courier', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.text(`Emitido em ${fmtDate(today())}`, margin, 21);
     y = 28;
@@ -330,7 +330,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     const h = 9;
     doc.setDrawColor(195, 202, 208);
     doc.setTextColor(0, 0, 0);
-    doc.setFont('courier', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     for (const c of cols) {
       doc.text(c.label, x + 2, y + 6);
@@ -370,7 +370,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
     if (y + h > pageH - 13) nextPage();
     let x = margin;
     for (let i = 0; i < cols.length; i++) {
-      doc.setFont('courier', 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
       doc.text(cells[i], x + 2, y + 5.8);

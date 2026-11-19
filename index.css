@@ -95,7 +95,7 @@
 body {
   margin: 0;
   background: var(--bg);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Arial, Helvetica, sans-serif;
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   transition: background-color 150ms ease, color 150ms ease;
@@ -470,7 +470,7 @@ select:focus {
 }
 
 .total-value {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Arial, Helvetica, sans-serif;
   font-variant-numeric: tabular-nums;
   font-size: 15px;
   font-weight: 700;
@@ -680,7 +680,7 @@ select:focus {
 .saved-table .num,
 .coils-table .num {
   text-align: right;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Arial, Helvetica, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1183,7 +1183,7 @@ select:focus {
 }
 
 .goal-title span:last-child {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Arial, Helvetica, sans-serif;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1288,7 +1288,7 @@ select:focus {
   color: #111;
   border-radius: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .report-sheet-header {
@@ -1642,7 +1642,7 @@ select:focus {
   }
 
   .mobile-record-total {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
     font-variant-numeric: tabular-nums;
     font-size: 15px;
     font-weight: 700;
@@ -1797,7 +1797,7 @@ select:focus {
 
   #printArea {
     display: block !important;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
   }
 
   #printArea .report-sheet {
@@ -1826,7 +1826,7 @@ select:focus {
 
   #printArea .report-sheet--production .pgroup th,
   #printArea .report-sheet--production .pgroup td {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 7.4pt;
     line-height: 1.1;
     padding: 2mm 1mm;
