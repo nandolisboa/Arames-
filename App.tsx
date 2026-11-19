@@ -28,6 +28,8 @@ export default function App() {
   const [profile, setProfile] = useState<AppProfile | null>(null);
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [productionLoadError, setProductionLoadError] = useState('');
 
   const [activeTab, setActiveTab] = useState<AppTab>('production');
   const [goalsOpen, setGoalsOpen] = useState(false);
@@ -146,6 +148,7 @@ export default function App() {
 
   const loadRows = useCallback(async () => {
     setLoadingRows(true);
+    setProductionLoadError('');
     try {
       const batchSize = 500;
       let offset = 0;
@@ -184,6 +187,10 @@ export default function App() {
           production_date: rowDate(r.production_date),
         }))
       );
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Erro de conexão';
+      setProductionLoadError(`Não foi possível carregar as produções: ${message}`);
+      throw e;
     } finally {
       setLoadingRows(false);
     }
@@ -373,7 +380,11 @@ export default function App() {
       setActiveTab('production');
 
       await loadGoals(resolvedProfile);
-      await loadRows();
+      try {
+        await loadRows();
+      } catch {
+        // The profile is valid; the production panel offers a retry.
+      }
 
       startPresence(sessionUser, resolvedProfile);
       startProductionRealtime();
@@ -421,6 +432,7 @@ export default function App() {
             );
           }
         }
+        if (active) setCheckingSession(false);
       })
       .catch((e) => {
         if (!active) return;
@@ -429,6 +441,7 @@ export default function App() {
         setLoginError(
           e instanceof Error ? e.message : 'Erro de conexão'
         );
+        setCheckingSession(false);
       });
 
     return () => {
@@ -595,16 +608,17 @@ export default function App() {
 
       const returnedDate = result.data[0].production_date;
       if (returnedDate && rowDate(returnedDate) !== production_date) {
-        throw new Error(
-          `O banco devolveu a data ${fmtDate(
-            rowDate(returnedDate)
-          )} em vez de ${fmtDate(
-            production_date
-          )}. A produção não foi confirmada com a data escolhida.`
-        );
+        notify(`Produção salva com data ${fmtDate(rowDate(returnedDate))}, diferente da escolhida. Confira o registro.`);
+        try { await loadRows(); } catch { /* The retry button remains available. */ }
+        return { ok: true, savedId: result.data[0].id };
       }
 
-      await loadRows();
+      try {
+        await loadRows();
+      } catch {
+        notify('Produção salva, mas a lista não atualizou. Toque em Tentar novamente.');
+        return { ok: true, savedId: result.data[0].id };
+      }
       notify(
         editingId !== null
           ? 'Alterações salvas'
@@ -629,7 +643,12 @@ export default function App() {
       if (!data?.length) {
         throw new Error('O banco não confirmou a exclusão.');
       }
-      await loadRows();
+      try {
+        await loadRows();
+      } catch {
+        notify('Registro apagado, mas a lista não atualizou. Toque em Tentar novamente.');
+        return;
+      }
       notify('Registro apagado');
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Não foi possível apagar');
@@ -702,7 +721,12 @@ export default function App() {
 
   return (
     <>
-      {!profile ? (
+      {checkingSession ? (
+        <main className="session-loading" role="status" aria-live="polite">
+          <span className="session-spinner" aria-hidden="true" />
+          <span>Carregando o sistema…</span>
+        </main>
+      ) : !profile ? (
         <LoginScreen
           busy={loginBusy}
           error={loginError}
@@ -815,6 +839,8 @@ export default function App() {
             allRows={allRows}
             isAdmin={isAdmin}
             loadingRows={loadingRows}
+            loadError={productionLoadError}
+            onRetryLoad={() => { void loadRows().catch(() => undefined); }}
             onlineOperators={onlineOperators}
             profile={profile}
             readAll={readAll}

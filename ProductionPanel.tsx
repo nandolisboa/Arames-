@@ -40,6 +40,8 @@ interface ProductionPanelProps {
   isAdmin: boolean;
   readAll: boolean;
   loadingRows: boolean;
+  loadError: string;
+  onRetryLoad: () => void;
   allRows: ProductionRow[];
   onlineOperators: Set<string>;
   onSaveProduction: (params: {
@@ -62,6 +64,8 @@ export function ProductionPanel({
   isAdmin,
   readAll,
   loadingRows,
+  loadError,
+  onRetryLoad,
   allRows,
   onlineOperators,
   onSaveProduction,
@@ -380,6 +384,7 @@ export function ProductionPanel({
     operatorToKeep: OperatorName | null = null,
     keepChoices: { gauge: string; kind: string } | null = null
   ) => {
+    beforeSpecialKindRef.current = null;
     setEditingId(null);
     setDate((prev) => (preserveDate && validDate(prev) ? prev : today()));
     setGauge((prev) =>
@@ -411,6 +416,7 @@ export function ProductionPanel({
 
   const beginEdit = (r: ProductionRow) => {
     if (!isAdmin) return;
+    beforeSpecialKindRef.current = null;
     setEditingId(r.id);
     setDate(rowDate(r.production_date));
     setOperator(r.operator as OperatorName);
@@ -954,7 +960,12 @@ export function ProductionPanel({
 
         <div className="groups" id="records">
           {loadingRows ? (
-            <div className="empty">Carregando…</div>
+            <div className="empty">Carregando produções…</div>
+          ) : loadError ? (
+            <div className="empty load-error" role="alert">
+              <p>{loadError}</p>
+              <button className="btn secondary small" type="button" onClick={onRetryLoad}>Tentar novamente</button>
+            </div>
           ) : !allRows.length ? (
             <div className="empty">Nenhuma produção registrada.</div>
           ) : !filteredRows.length ? (

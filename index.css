@@ -1969,3 +1969,9 @@ select:focus {
 #formCard .btn.gauge-toggle.gauge-text-50 { color: var(--gauge-50); }
 #formCard .btn.gauge-toggle.gauge-text-60 { color: var(--gauge-60); }
 @media (max-width: 760px) { #formCard .field .gauge-toggle, #formCard .field .package-kind-toggle { height: 46px; min-height: 46px; font-size: 16px; } }
+
+
+.session-loading { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--ink); font-size: 16px; font-weight: 600; }
+.session-spinner { width: 34px; height: 34px; border: 3px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: session-spin .8s linear infinite; }
+@keyframes session-spin { to { transform: rotate(360deg); } }
+.load-error p { margin: 0 0 12px; color: var(--invalid-text); }
