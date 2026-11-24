@@ -508,7 +508,11 @@ export function CoilsPanel({
                     </div>
                     <div className="mobile-record-total">
                       {c.weight_source === 'AMBOS' && c.weight_label_kg != null && c.weight_scale_kg != null
-                        ? formatCoilWeights(c).split(' / ').map((weight) => <div key={weight}>{weight}</div>)
+                        ? formatCoilWeights(c).split(' / ').map((weight) => (
+                            <div key={weight}>
+                              {weight.replace('Etiqueta:', 'Etiq.').replace('Balança:', 'Bal.')}
+                            </div>
+                          ))
                         : formatCoilWeights(c)}
                     </div>
                   </div>
