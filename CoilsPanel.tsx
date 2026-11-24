@@ -513,7 +513,7 @@ export function CoilsPanel({
                               {weight.replace('Etiqueta:', 'Etiq.').replace('Balança:', 'Bal.')}
                             </div>
                           ))
-                        : formatCoilWeights(c)}
+                        : `${c.weight_source === 'ETIQUETA' ? 'Etiq.' : 'Bal.'} ${formatCoilWeights(c)}`}
                     </div>
                   </div>
                   <div className="mobile-record-bottom">
