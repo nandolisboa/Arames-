@@ -1,4 +1,4 @@
-import { formatCoilWeights } from '../lib/coilWeights';
+import { formatCoilWeightsForReport } from '../lib/coilWeights';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { ARAMES_LOGO_DATA_URL } from '../assets/logo';
@@ -132,7 +132,7 @@ function ReportDocument({ preview }: ReportDocumentProps) {
                   <td>{c.invoice_number || ''}</td>
                   <td>{c.invoice_series || ''}</td>
                   <td className="num">
-                    {formatCoilWeights(c)}
+                    {formatCoilWeightsForReport(c)}
                   </td>
                   <td>
                     {c.weight_source === 'ETIQUETA' ? 'Etiqueta' : c.weight_source === 'AMBOS' ? 'Ambos' : 'Balança'}

@@ -7,3 +7,15 @@ export function formatCoilWeights(c: CoilRow): string {
   }
   return fmt(c.weight_kg);
 }
+
+
+/** Compact labels for coil weight values in PDF and print reports. */
+export function formatCoilWeightsForReport(c: CoilRow): string {
+  const full = formatCoilWeights(c);
+  if (c.weight_source === 'AMBOS' && c.weight_label_kg != null && c.weight_scale_kg != null) {
+    return full.replace('Etiqueta:', 'Etiq.:').replace('Balança:', 'Bal.:');
+  }
+  if (c.weight_source === 'ETIQUETA') return `Etiq. ${full}`;
+  if (c.weight_source === 'BALANCA') return `Bal. ${full}`;
+  return full;
+}

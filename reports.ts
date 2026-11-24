@@ -1,4 +1,4 @@
-import { formatCoilWeights } from './coilWeights';
+import { formatCoilWeightsForReport } from './coilWeights';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import { ARAMES_LOGO_DATA_URL } from '../assets/logo';
@@ -355,7 +355,7 @@ function buildCoilsPDFDoc(coilRows: CoilRow[]): jsPDF {
         String(c.manufacturer || ''),
         String(c.invoice_number || ''),
         String(c.invoice_series || ''),
-        formatCoilWeights(c),
+        formatCoilWeightsForReport(c),
         c.weight_source === 'ETIQUETA' ? 'Etiqueta' : c.weight_source === 'AMBOS' ? 'Ambos' : 'Balança',
       ])
     : [['', '', '', '', '', 'Nenhuma bobina cadastrada']];
