@@ -492,7 +492,7 @@ export function CoilsPanel({
             <div className="mobile-record-list">
               {filteredCoils.map((c) => (
                 <article key={c.id} className="mobile-record-card">
-                  <div className="mobile-record-top">
+                  <div className={c.weight_source === 'AMBOS' ? 'mobile-record-top mobile-coil-both' : 'mobile-record-top'}>
                     <div className="mobile-record-main">
                       <strong
                         className={`mobile-record-gauge ${gaugeTextClass(c.gauge)}`}
@@ -507,7 +507,9 @@ export function CoilsPanel({
                       </span>
                     </div>
                     <div className="mobile-record-total">
-                      {formatCoilWeights(c)}
+                      {c.weight_source === 'AMBOS' && c.weight_label_kg != null && c.weight_scale_kg != null
+                        ? formatCoilWeights(c).split(' / ').map((weight) => <div key={weight}>{weight}</div>)
+                        : formatCoilWeights(c)}
                     </div>
                   </div>
                   <div className="mobile-record-bottom">

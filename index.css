@@ -1651,6 +1651,19 @@ select:focus {
     flex-shrink: 0;
   }
 
+  /* Both weights need their own lines on narrow screens. */
+  .mobile-coil-both {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-coil-both .mobile-record-main,
+  .mobile-coil-both .mobile-record-total {
+    overflow-wrap: anywhere;
+    white-space: normal;
+    min-width: 0;
+  }
+
   .mobile-record-bottom {
     display: flex;
     align-items: center;
