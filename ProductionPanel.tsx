@@ -99,6 +99,7 @@ export function ProductionPanel({
   const [showMeasureSuggestions, setShowMeasureSuggestions] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pdfPreview, setPdfPreview] = useState<PdfPreviewData | null>(null);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [pendingDeleteRow, setPendingDeleteRow] =
     useState<ProductionRow | null>(null);
 
@@ -112,6 +113,7 @@ export function ProductionPanel({
   const unitsRef = useRef<HTMLInputElement>(null);
   const measureSuggestionsRef = useRef<HTMLDivElement>(null);
   const confirmDialogRef = useRef<HTMLDialogElement>(null);
+  const summaryDialogRef = useRef<HTMLDialogElement>(null);
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -152,6 +154,18 @@ export function ProductionPanel({
       dlg.close();
     }
   }, [confirmModalOpen]);
+
+  useEffect(() => {
+    const dialog = summaryDialogRef.current;
+    if (!dialog) return;
+    if (summaryOpen && !dialog.open) dialog.showModal();
+    else if (!summaryOpen && dialog.open) dialog.close();
+  }, [summaryOpen]);
+
+  const totalAllPieces = useMemo(
+    () => allRows.reduce((sum, row) => sum + (Number(row.total_pieces) || 0), 0),
+    [allRows]
+  );
 
   const measureSuggestions = useMemo(() => {
     if (debouncedMeasureQuery.length < 1) return [];
@@ -940,6 +954,53 @@ export function ProductionPanel({
             </div>
           )}
         </div>
+
+        {readAll && (
+          <>
+            <div className="production-grand-total" aria-live="polite">
+              <div>
+                <span className="production-grand-total-label">Total geral de produção</span>
+                <strong>{loadingRows ? 'Carregando…' : loadError ? 'Indisponível' : `${totalAllPieces.toLocaleString('pt-BR')} peças`}</strong>
+                <span className="production-grand-total-note">Todas as produções registradas · sem filtro de busca</span>
+              </div>
+              {isAdministration && (
+                <button className="btn secondary small" type="button" disabled={loadingRows || !!loadError} onClick={() => setSummaryOpen(true)}>
+                  Ver resumo
+                </button>
+              )}
+            </div>
+            <dialog
+              ref={summaryDialogRef}
+              className="production-summary-dialog"
+              aria-labelledby="production-summary-title"
+              onClose={() => setSummaryOpen(false)}
+            >
+              <div className="production-summary-top">
+                <div>
+                  <span className="production-summary-kicker">ARAMES BRASIL</span>
+                  <h2 id="production-summary-title">Resumo da produção</h2>
+                  <p>Todas as produções registradas</p>
+                </div>
+                <button aria-label="Fechar resumo" className="production-summary-close" type="button" onClick={() => setSummaryOpen(false)}>×</button>
+              </div>
+              <div className="production-summary-highlight">
+                <span>Total geral</span>
+                <strong>{totalAllPieces.toLocaleString('pt-BR')}</strong>
+                <span>peças produzidas</span>
+              </div>
+              <div className="production-summary-list">
+                {OPERATORS.map((op) => (
+                  <div key={op} className="production-summary-row">
+                    <span>{op}</span>
+                    <strong>{allRows.filter((row) => row.operator === op).reduce((sum, row) => sum + (Number(row.total_pieces) || 0), 0).toLocaleString('pt-BR')} peças</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="production-summary-footnote">O total inclui todas as produções carregadas, independentemente da busca.</p>
+              <button className="btn secondary production-summary-done" type="button" onClick={() => setSummaryOpen(false)}>Fechar</button>
+            </dialog>
+          </>
+        )}
 
         <div className="field coil-search-field search-input-wrap">
           <Search aria-hidden="true" className="search-icon" size={16} />
