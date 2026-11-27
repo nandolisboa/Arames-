@@ -1,0 +1,41 @@
+name: Validar modelo aprovado (sem publicar)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: validate-model-arames
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar pacote-fonte aprovado
+        run: |
+          echo '289de58b7007e2d658dc48da78296042d108d0b2ddceb06b78c19f24a88a471e  modelo-aprovado-src.zip' | sha256sum -c
+      - name: Preparar projeto oficial e substituir somente o código-fonte
+        run: |
+          mkdir app
+          unzip -q projeto-base-arames.zip -d app
+          cp CoilsPanel.tsx app/src/components/CoilsPanel.tsx
+          cp PdfPreviewDialog.tsx app/src/components/PdfPreviewDialog.tsx
+          cp App.tsx app/src/App.tsx
+          cp types.ts app/src/types.ts
+          cp coilWeights.ts app/src/lib/coilWeights.ts
+          cp ProductionPanel.tsx app/src/components/ProductionPanel.tsx
+          cp index.css app/src/index.css
+          cp reports.ts app/src/lib/reports.ts
+          unzip -q modelo-aprovado-src.zip -d app
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Instalar as dependências oficiais
+        working-directory: app
+        run: bun install --frozen-lockfile
+      - name: Validar tipos e lint
+        working-directory: app
+        run: bun run lint
+      - name: Compilar para o endereço oficial, sem publicar
+        working-directory: app
+        run: bun run build --base /Arames-/
