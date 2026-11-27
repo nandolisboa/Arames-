@@ -26,7 +26,7 @@ jobs:
           cp ProductionPanel.tsx app/src/components/ProductionPanel.tsx
           cp index.css app/src/index.css
           cp reports.ts app/src/lib/reports.ts
-          unzip -q modelo-aprovado-src.zip -d app
+          unzip -qo modelo-aprovado-src.zip -d app
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
