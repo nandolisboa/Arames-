@@ -1,4 +1,4 @@
-name: Publicar atualizacao do controle
+name: Publicar atualização do controle
 on:
   workflow_dispatch:
   push:
@@ -15,11 +15,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar codigo oficial
+      - name: Baixar código oficial
         uses: actions/checkout@v4
         with:
           path: melhorias
-      - name: Restaurar base e aplicar arquivos oficiais
+      - name: Verificar pacote-fonte aprovado
+        run: |
+          echo '289de58b7007e2d658dc48da78296042d108d0b2ddceb06b78c19f24a88a471e  melhorias/modelo-aprovado-src.zip' | sha256sum -c
+      - name: Restaurar base, aplicar sobreposições e depois o modelo aprovado
         run: |
           mkdir app
           unzip -q melhorias/projeto-base-arames.zip -d app
@@ -31,13 +34,14 @@ jobs:
           cp melhorias/ProductionPanel.tsx app/src/components/ProductionPanel.tsx
           cp melhorias/index.css app/src/index.css
           cp melhorias/reports.ts app/src/lib/reports.ts
+          unzip -qo melhorias/modelo-aprovado-src.zip -d app
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Instalar dependencias
+      - name: Instalar dependências oficiais
         working-directory: app
         run: bun install --frozen-lockfile
-      - name: Verificar codigo e compilar para o endereco oficial
+      - name: Verificar código e compilar para o endereço oficial
         working-directory: app
         run: |
           bun run lint
